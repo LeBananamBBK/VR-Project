@@ -13,8 +13,6 @@ public class ShootWhenGrabbed : MonoBehaviour {
 	void Start () {
         simpleShoot = GetComponent<SimpleShoot>();
         ovrGrabbable = GetComponent<OVRGrabbable>();
-
-
 	}
 	
 	// Update is called once per frame
