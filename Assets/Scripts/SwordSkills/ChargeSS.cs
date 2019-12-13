@@ -13,7 +13,12 @@ public class ChargeSS : MonoBehaviour {
     //Get OVRGrabbable
     private OVRGrabbable ovrGrabbable;
     //Max charge time
-    public float maxTime = 3f;
+    public float maxChargeTime = 3f;
+    //CD
+    public float CD = 5f;
+
+    private float temptimer = 0f;
+    private bool onCD = false;
 
     private float currentcharge = 0f;
     private bool initiated = false;
@@ -22,6 +27,12 @@ public class ChargeSS : MonoBehaviour {
 
     //Debug
     private TextMesh text;
+
+    public float getCurrentCharge()
+    {
+        return currentcharge;
+    }
+    
 
 	// Use this for initialization
 	void Start () {
@@ -33,20 +44,33 @@ public class ChargeSS : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void FixedUpdate () {
+	void FixedUpdate ()
+    {
+        //Cooldown hanlding
+        if (onCD)
+        {
+            temptimer -= Time.deltaTime;
+
+            if (temptimer <= 0)
+            {
+                temptimer = 0f;
+                onCD = false;
+            }
+        }
+
         if (ovrGrabbable.isGrabbed)
         {
-            if (OVRInput.Get(inputButton, ovrGrabbable.grabbedBy.getController()))
+            if (OVRInput.Get(inputButton, ovrGrabbable.grabbedBy.getController()) && !onCD)
             {
                 initiated = true;
 
-                if (currentcharge < maxTime)
+                if (currentcharge < maxChargeTime)
                 {
                     currentcharge += Time.deltaTime;
                 }
                 else
                 {
-                    currentcharge = maxTime;
+                    currentcharge = maxChargeTime;
                 }
 
                 transform.localScale = initransform + new Vector3(currentcharge,currentcharge,currentcharge);
@@ -57,6 +81,7 @@ public class ChargeSS : MonoBehaviour {
                 {
                     initiated = false;
                     TriggerUse();
+                    CDReset();
                 }
             }
         }
@@ -64,7 +89,7 @@ public class ChargeSS : MonoBehaviour {
         //Debug
         if (text)
         {
-            text.text = gameObject.layer.ToString();
+            text.text = temptimer.ToString();
         }
         
     }
@@ -74,5 +99,17 @@ public class ChargeSS : MonoBehaviour {
     {
         currentcharge = 0f;
         transform.localScale = initransform;
+    }
+
+    public void CDReset()
+    {
+        temptimer = CD;
+        onCD = true;
+    }
+
+    public virtual void Reset()
+    {
+        TriggerUse();
+        CDReset();
     }
 }
