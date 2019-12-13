@@ -16,6 +16,7 @@ permissions and limitations under the License.
 
 using System;
 using UnityEngine;
+using MyTools;
 
 /// <summary>
 /// An object that can be grabbed and thrown by OVRGrabber.
@@ -37,9 +38,11 @@ public class OVRGrabbable : MonoBehaviour
     protected Collider m_grabbedCollider = null;
     protected OVRGrabber m_grabbedBy = null;
 
-	/// <summary>
-	/// If true, the object can currently be grabbed.
-	/// </summary>
+    private int iniLayer;
+
+    /// <summary>
+    /// If true, the object can currently be grabbed.
+    /// </summary>
     public bool allowOffhandGrab
     {
         get { return m_allowOffhandGrab; }
@@ -117,6 +120,8 @@ public class OVRGrabbable : MonoBehaviour
         m_grabbedBy = hand;
         m_grabbedCollider = grabPoint;
         gameObject.GetComponent<Rigidbody>().isKinematic = true;
+
+        RecursiveLayerSet.SetLayerRecursively(gameObject, hand.gameObject.layer);
     }
 
 	/// <summary>
@@ -130,10 +135,14 @@ public class OVRGrabbable : MonoBehaviour
         rb.angularVelocity = angularVelocity;
         m_grabbedBy = null;
         m_grabbedCollider = null;
+
+        RecursiveLayerSet.SetLayerRecursively(gameObject, iniLayer);
     }
 
-    void Awake()
+    void Awake() 
     {
+        iniLayer = gameObject.layer;
+
         if (m_grabPoints.Length == 0)
         {
             // Get the collider from the grabbable
